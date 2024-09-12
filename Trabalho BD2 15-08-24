@@ -1,0 +1,161 @@
+mysql -u root
+
+show databases;
+
+create database biblioteca;
+
+use biblioteca;
+
+--criando a tabela generos
+create table generos (
+    numero int not null auto_increment,
+    nome varchar(100) not null,
+    primary key (numero)
+);
+
+--criando a tabela livros
+create table livros(
+    numero int not null auto_increment,
+    titulo varchar(20) not null,
+    autor varchar(30) not null, 
+    editora varchar(30) not null,
+    genero varchar(100) not null,
+    ano_publicacao int not null check (ano_publicacao >= 1500),
+    cor_livro varchar(30) default 'branco',
+    primary key (numero)
+);
+
+--excluindo coluna cor_livro
+alter table livros
+    drop cor_livro;
+
+--criando o relacionamento generos_livros
+create table generso_livros(
+    generso int not null,
+    livro int not null,
+    constraint generos_livros_pk primary key(generso, livro)
+);
+
+alter table generso_livros
+add constraint generos_generos_livros_fk
+    foreign key(generso)
+    references generos(numero);
+
+alter table generso_livros
+add constraint livros_generos_livros_fk
+    foreign key(livro)
+    references livros(numero);
+
+--renomeando a tabela
+alter table generso_livros
+    rename generos_livros;
+
+--renomeando colunas
+alter table generos_livros
+    change generso genero int not null;
+
+--criando a tabela autores
+create table autores (
+    numero int not null auto_increment,
+    nome varchar(100) not null unique,
+    primary key (numero)
+);
+
+--criando a tabela editoras
+create table editoras (
+    numero int not null auto_increment,
+    nome varchar(100) not null,
+    primary key (numero)
+);
+
+--criando a tabela autores_livros
+create table autores_livros (
+    autor int not null,
+    livro int not null,
+    primary key (autor, livro),
+    foreign key (autor) references autores(numero),
+    foreign key (livro) references livros(numero)
+);
+
+--criando a tabela editoras_livros
+create table editoras_livros (
+    editora int not null,
+    livro int not null,
+    primary key (editora, livro),
+    foreign key (editora) references editoras(numero),
+    foreign key (livro) references livros(numero)
+);
+
+--criando a tabela membros
+create table membros (
+    id_membro int not null auto_increment,
+    nome varchar(100) not null,
+    data_nascimento date not null,
+    endereco varchar(100) not null,
+    telefone varchar(20) not null,
+    email varchar(100) not null,
+    data_cadastro date not null,
+    funcionario varchar(15) not null,
+    primary key (id_membro)
+);
+
+--criando a tabela funcionarios
+create table funcionarios (
+    id_funcionario int not null auto_increment,
+    nome varchar(100) not null,
+    data_nascimento date not null,
+    cargo varchar(50) not null,
+    telefone varchar(50) not null,
+    email varchar(100) not null,
+    data_admissao date not null,
+    primary key (id_funcionario)
+);
+
+--criando a tabela emprestimos
+create table emprestimos (
+    id_emprestimo int not null auto_increment,
+    id_livro int not null,
+    id_membro int not null,
+    id_funcionario int not null,
+    data_emprestimo date not null,
+    data_devolucao_prevista date not null,
+    data_devolucao date,
+    status_livro varchar(10) not null, 
+    reserva int,
+    primary key (id_emprestimo),
+    constraint id_livro_fk foreign key (id_livro) references livros(numero),
+    constraint id_membro_fk foreign key (id_membro) references membros(id_membro),
+    constraint id_funcionario_fk foreign key (id_funcionario) references funcionarios(id_funcionario)
+);
+
+--criando a tabela categorias
+create table categorias (
+    id_categoria varchar(100) not null,
+    nome varchar(15) not null,
+    descricao varchar(100),
+    relacionamento varchar(100),
+    primary key (id_categoria)
+);
+
+--criando a tabela reservas
+create table reservas (
+    id_reserva int not null auto_increment,
+    id_livro int not null,
+    id_membro int not null,
+    data_reserva date,
+    status_reserva varchar(10) not null,
+    id_categoria varchar(100) not null,
+    primary key (id_reserva),
+    constraint reserva_livro_fk foreign key (id_livro) references livros(numero),
+    constraint reserva_membro_fk foreign key (id_membro) references membros(id_membro),
+    constraint reserva_categoria_fk foreign key (id_categoria) references categorias(id_categoria)
+);
+
+--excluindo a tabela funcionarios
+alter table emprestimos
+    drop constraint id_funcionario_fk;
+
+alter table emprestimos
+    drop column id_funcionario;
+
+drop table funcionarios;
